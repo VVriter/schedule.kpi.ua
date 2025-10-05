@@ -4,7 +4,7 @@ import { StudentPair } from '../../models/StudentPair';
 import { ExtendedScheduleItemProps } from './types';
 import StudentScheduleContent from '../ScheduleItem/StudentScheduleContent';
 
-const StudentScheduleItemExtended = <T extends StudentPair>({ scheduleMatrixCell }: ExtendedScheduleItemProps<T>) => {
+const StudentScheduleItemExtended = <T extends StudentPair>({ scheduleMatrixCell, dayIndex }: ExtendedScheduleItemProps<T>) => {
   const hasData = useMemo(() => {
     const emptyEntries = scheduleMatrixCell.filter((x) => !x.pair.lecturer && !x.pair.location && !x.pair.dates.length);
 
@@ -16,6 +16,7 @@ const StudentScheduleItemExtended = <T extends StudentPair>({ scheduleMatrixCell
       scheduleMatrixCell={scheduleMatrixCell}
       childComponent={StudentScheduleContent}
       hasData={hasData}
+      dayIndex={dayIndex}
     />
   );
 };

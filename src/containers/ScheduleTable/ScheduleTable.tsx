@@ -1,10 +1,12 @@
 import React from 'react';
 import { generateScheduleMatrix } from '../../common/utils/generateScheduleMatrix';
 import { Pair } from '../../models/Pair';
+import { StudentPair } from '../../models/StudentPair';
 import { Schedule } from '../../models/Schedule';
 import { ScheduleHeader } from '../ScheduleHeader';
 import ScheduleRow from '../ScheduleRow';
 import TimeDivider from '../../components/TimeDivider';
+import WeekExportButton from '../../components/WeekExportButton';
 import { getValueFromTheme } from '../../common/utils/getValueFromTheme';
 import { media } from '../../common/styles/styles';
 import { range } from 'lodash-es';
@@ -107,9 +109,16 @@ const ScheduleTable = <T extends Pair>({
 
   const scheduleMatrix = generateScheduleMatrix<T>(weekSchedule, timeSlots, currentTime.currentLesson);
 
+  const isStudentSchedule = (schedule: Schedule<Pair> | undefined): schedule is Schedule<StudentPair> => {
+    if (!schedule) return false;
+    const firstPair = schedule.scheduleFirstWeek[0]?.pairs[0] || schedule.scheduleSecondWeek[0]?.pairs[0];
+    return firstPair ? 'lecturer' in firstPair : false;
+  };
+
   return (
     <GridContainer>
       {currentDayColumn ? <CurrentDayContainer $start={currentDayColumn} /> : null}
+      {isStudentSchedule(schedule) && <WeekExportButton schedule={schedule} />}
       <ScheduleHeader />
       {generateScheduleRows(scheduleMatrix, timeSlots)}
     </GridContainer>

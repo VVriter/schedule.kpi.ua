@@ -1,11 +1,16 @@
 import { SUBJECT_TYPES } from '../../common/constants/subjectTypes';
 import { Pair } from '../../models/Pair';
+import { StudentPair } from '../../models/StudentPair';
 
 import styled from 'styled-components';
 import { Flex } from '../../common/styles/styles';
 import { getValueFromTheme } from '../../common/utils/getValueFromTheme';
 import SubjectTypeBadge from '../../components/SubjectTypeBadge';
+import GoogleCalendarButton from '../../components/GoogleCalendarButton';
 import { ScheduleMatrixCell } from '../../types/ScheduleMatrix';
+import { pairToCalendarEvent, openGoogleCalendar, getNextDateForDayOfWeek } from '../../services/googleCalendar';
+import { useTimeSlots } from '../../queries/useTimeSlots';
+import dayjs from 'dayjs';
 
 const Subject = styled.div`
   font-weight: bold;
@@ -53,12 +58,52 @@ interface Props<T extends Pair> {
   scheduleMatrixCell: ScheduleMatrixCell<T>;
   collapsed?: boolean;
   children: React.ReactNode;
+  dayIndex?: number; // 0 = понеділок, 1 = вівторок, ..., 5 = субота
 }
 
-const ScheduleItemBase = <T extends Pair>({ scheduleMatrixCell, collapsed, children }: Props<T>) => {
+const ScheduleItemBase = <T extends Pair>({ scheduleMatrixCell, collapsed, children, dayIndex }: Props<T>) => {
   const {
-    pair: { name, tag, dates },
+    pair: { name, tag, dates, time },
   } = scheduleMatrixCell;
+  
+  const { data: timeSlots } = useTimeSlots();
+
+  const handleExportToCalendar = () => {
+    if (!timeSlots || !isStudentPair(scheduleMatrixCell.pair)) return;
+    
+    // Знаходимо відповідний timeSlot для поточної пари
+    // Спочатку пробуємо знайти точний збіг
+    let matchingTimeSlot = timeSlots.find(slot => slot === time);
+    
+    // Якщо не знайшли точний збіг, використовуємо перший доступний або сам time
+    if (!matchingTimeSlot) {
+      console.warn('TimeSlot not found for time:', time, 'Available slots:', timeSlots);
+      matchingTimeSlot = time || timeSlots[0] || '08:30-10:05';
+    }
+
+    // Визначаємо правильну дату на основі дня тижня
+    let targetDate: Date;
+    if (dayIndex !== undefined) {
+      // Конвертуємо dayIndex (0-5) в dayjs day (1-6, де 1 = понеділок)
+      const dayOfWeek = dayIndex + 1;
+      targetDate = getNextDateForDayOfWeek(dayOfWeek);
+    } else {
+      // Fallback на сьогоднішню дату, якщо dayIndex не передано
+      targetDate = dayjs().toDate();
+    }
+    
+    const event = pairToCalendarEvent(
+      scheduleMatrixCell.pair,
+      targetDate,
+      matchingTimeSlot
+    );
+    
+    openGoogleCalendar(event);
+  };
+
+  const isStudentPair = (pair: Pair): pair is StudentPair => {
+    return 'lecturer' in pair;
+  };
 
   return (
     <>
@@ -66,7 +111,14 @@ const ScheduleItemBase = <T extends Pair>({ scheduleMatrixCell, collapsed, child
         <SubjectTypeBadge type={tag} dates={dates}>
           {SUBJECT_TYPES[tag]}
         </SubjectTypeBadge>
-        {scheduleMatrixCell.currentPair && <ScheduleItemCurrent>Зараз</ScheduleItemCurrent>}
+        <Flex style={{ gap: '8px', alignItems: 'center' }}>
+          {isStudentPair(scheduleMatrixCell.pair) && (
+            <GoogleCalendarButton onClick={handleExportToCalendar}>
+              Календар
+            </GoogleCalendarButton>
+          )}
+          {scheduleMatrixCell.currentPair && <ScheduleItemCurrent>Зараз</ScheduleItemCurrent>}
+        </Flex>
       </ScheduleItemHeader>
       <Subject>{name}</Subject>
       {!collapsed && <CollapsedItemsWrapper>{children}</CollapsedItemsWrapper>}

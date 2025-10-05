@@ -5,13 +5,13 @@ import PairLocationProperty from './PairLocationProperty';
 import { IrregularSchedulesTable } from './IrregularSchedulesTable';
 import LecturerProperty from './LecturerProperty';
 
-const StudentScheduleContent = <T extends StudentPair>({ scheduleMatrixCell, collapsed }: ScheduleItemProps<T>) => {
+const StudentScheduleContent = <T extends StudentPair>({ scheduleMatrixCell, collapsed, dayIndex }: ScheduleItemProps<T>) => {
   const {
     pair: { lecturer, location, dates },
   } = scheduleMatrixCell;
 
   return (
-    <ScheduleItemBase scheduleMatrixCell={scheduleMatrixCell} collapsed={collapsed}>
+    <ScheduleItemBase scheduleMatrixCell={scheduleMatrixCell} collapsed={collapsed} dayIndex={dayIndex}>
       {lecturer && <LecturerProperty lecturer={lecturer} />}
       {location && <PairLocationProperty location={location} />}
       {!!dates.length && <IrregularSchedulesTable dates={dates} />}

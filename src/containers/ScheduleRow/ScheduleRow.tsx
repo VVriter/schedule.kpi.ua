@@ -16,10 +16,14 @@ const ScheduleRow = <T extends Pair>({
     <>
       {scheduleMatrixCell.map((item, index) => {
         if (Array.isArray(item)) {
-          return <BaseComponentExtended key={index} scheduleMatrixCell={item} />;
+          return <BaseComponentExtended key={index} scheduleMatrixCell={item} dayIndex={index} />;
         }
 
-        return item ? <BaseComponent key={index} scheduleMatrixCell={item} /> : <EmptyElement key={index} />;
+        return item ? (
+          <BaseComponent key={index} scheduleMatrixCell={item} dayIndex={index} />
+        ) : (
+          <EmptyElement key={index} />
+        );
       })}
     </>
   );

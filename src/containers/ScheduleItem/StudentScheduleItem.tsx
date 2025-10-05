@@ -3,10 +3,10 @@ import { ScheduleItemProps } from './types';
 import StudentScheduleContent from './StudentScheduleContent';
 import { ScheduleItemWrapper } from './ScheduleItem.style';
 
-const StudentScheduleItem = <T extends StudentPair>({ scheduleMatrixCell, collapsed }: ScheduleItemProps<T>) => {
+const StudentScheduleItem = <T extends StudentPair>({ scheduleMatrixCell, collapsed, dayIndex }: ScheduleItemProps<T>) => {
   return (
     <ScheduleItemWrapper>
-      <StudentScheduleContent scheduleMatrixCell={scheduleMatrixCell} collapsed={collapsed} />
+      <StudentScheduleContent scheduleMatrixCell={scheduleMatrixCell} collapsed={collapsed} dayIndex={dayIndex} />
     </ScheduleItemWrapper>
   );
 };

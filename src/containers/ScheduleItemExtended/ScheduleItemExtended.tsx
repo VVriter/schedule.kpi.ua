@@ -13,19 +13,21 @@ interface ScheduleItemExtendedProps<T extends Pair> {
   scheduleMatrixCell: ScheduleMatrixCell<T>[];
   hasData: boolean;
   childComponent: React.ComponentType<ScheduleItemProps<T>>;
+  dayIndex?: number;
 }
 
 const ScheduleItemExtended = <T extends Pair>({
   scheduleMatrixCell,
   hasData,
   childComponent: ChildComponent,
+  dayIndex,
 }: ScheduleItemExtendedProps<T>) => {
   const [collapsed, setCollapsed] = useState(true);
 
   const generateScheduleUnits = () =>
     scheduleMatrixCell.map((item, i) => (
       <ScheduleItemExtendedUnit key={i}>
-        <ChildComponent collapsed={collapsed} scheduleMatrixCell={item} />
+        <ChildComponent collapsed={collapsed} scheduleMatrixCell={item} dayIndex={dayIndex} />
       </ScheduleItemExtendedUnit>
     ));
 
